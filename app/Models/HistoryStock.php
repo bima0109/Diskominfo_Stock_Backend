@@ -3,8 +3,18 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class HistoryStock extends Model
 {
-    //
+    use hasFactory;
+
+    protected $fillable = [
+        'nama_barang',
+        'jumlah',
+        'satuan',
+        'harga',
+        'tanggal',
+        'stock_opname_id',
+    ];
 }

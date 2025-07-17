@@ -20,8 +20,9 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'nama',
-        'email',
+        'username',
         'password',
+        'role',
         'id_role',
         'id_bidang',
     ];
@@ -54,8 +55,12 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
+
             'password' => 'hashed',
         ];
+    }
+    public function getAuthIdentifierName()
+    {
+        return 'username';
     }
 }

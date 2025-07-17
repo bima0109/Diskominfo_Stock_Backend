@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nama_barang');
             $table->integer('jumlah');
             $table->string('satuan');
-            // $table->date('tanggal');
+            $table->date('tanggal');
             $table->decimal('harga', 10, 2);
             $table->timestamps();
         });

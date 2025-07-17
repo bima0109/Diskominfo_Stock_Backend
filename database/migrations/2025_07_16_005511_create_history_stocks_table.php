@@ -13,6 +13,13 @@ return new class extends Migration
     {
         Schema::create('history_stocks', function (Blueprint $table) {
             $table->id();
+            $table->string('nama_barang');
+            $table->integer('jumlah');
+            $table->string('satuan');
+            $table->date('tanggal');
+            $table->decimal('harga', 10, 2);
+            $table->unsignedBigInteger('stock_opname_id')->nullable();
+            $table->foreign('stock_opname_id')->references('id')->on('stock_opnames')->onDelete('cascade');
             $table->timestamps();
         });
     }

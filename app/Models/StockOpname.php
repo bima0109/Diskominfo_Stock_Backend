@@ -14,5 +14,9 @@ class StockOpname extends Model
         'jumlah',
         'satuan',
         'harga',
+        'tanggal',
+    ];
+    protected $casts = [
+        'tanggal' => 'date',
     ];
 }

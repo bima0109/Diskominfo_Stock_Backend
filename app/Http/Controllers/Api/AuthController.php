@@ -18,34 +18,30 @@ class AuthController extends Controller
     {
         // Validasi input
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'username' => 'required|string|max:255',
             'password' => 'required|min:6',
         ]);
 
-        // Jika validasi gagal
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validation errors',
                 'errors' => $validator->errors(),
-            ], 422); // Gunakan kode 422 Unprocessable Entity untuk validasi
+            ], 422);
         }
 
-        // Cari user berdasarkan email
-        $user = User::where('email', $request->email)->first();
+        // Ambil user + relasi role & bidang
+        $user = User::with(['role', 'bidang'])->where('username', $request->username)->first();
 
-        // Jika user tidak ditemukan atau password salah
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid email or password',
-            ], 401); // Unauthorized
+                'message' => 'Invalid username or password',
+            ], 401);
         }
 
-        // Buat token
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // Berhasil login
         return response()->json([
             'success' => true,
             'message' => 'Login successful',

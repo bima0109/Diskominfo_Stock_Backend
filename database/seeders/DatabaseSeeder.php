@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             StockOpnameSeeder::class,
+            HistoryStockSeeder::class,
             RoleSeeder::class,
             BidangSeeder::class,
             UserSeeder::class,
