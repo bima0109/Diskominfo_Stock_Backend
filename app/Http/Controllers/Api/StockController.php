@@ -20,6 +20,7 @@ class StockController extends Controller
         if ($stockOpname->count() > 0) {
             $formatted = $stockOpname->map(function ($item) {
                 return [
+                    'id'            => $item->id,
                     'nama_barang'   => $item->nama_barang,
                     'Jumlah'        => $item->jumlah,
                     'satuan'        => $item->satuan,
