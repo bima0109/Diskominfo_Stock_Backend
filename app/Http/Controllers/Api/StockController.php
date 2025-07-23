@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\HistoryStock;
 use App\Models\StockOpname;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\QueryException;
 
 class StockController extends Controller
 {
@@ -24,8 +26,8 @@ class StockController extends Controller
                     'nama_barang'   => $item->nama_barang,
                     'Jumlah'        => $item->jumlah,
                     'satuan'        => $item->satuan,
-                    'Harga Satuan'  => $item->harga,
-                    'jumlah'        => $item->jumlah * $item->harga,
+                    // 'Harga Satuan'  => $item->harga,
+                    // 'jumlah'        => $item->jumlah * $item->harga,
                     'bulan'         => $item->tanggal->format('F'),
                     'tahun'         => $item->tanggal->format('Y'),
                 ];
@@ -46,10 +48,6 @@ class StockController extends Controller
     }
 
 
-
-
-
-
     public function store(Request $request)
     {
         try {
@@ -58,7 +56,7 @@ class StockController extends Controller
                 'nama_barang' => 'required|string|max:255|unique:stock_opnames,nama_barang',
                 'jumlah' => 'required|integer',
                 'satuan' => 'required|string|max:50',
-                'harga' => 'required|numeric',
+                // 'harga' => 'required|numeric',
                 'tanggal' => 'nullable|date_format:Y-m-d',
             ]);
             $validated['tanggal'] = $validated['tanggal'] ?? now()->format('Y-m-d');
@@ -71,7 +69,7 @@ class StockController extends Controller
                 'nama_barang' => $stockOpname->nama_barang,
                 'jumlah' => $stockOpname->jumlah,
                 'satuan' => $stockOpname->satuan,
-                'harga' => $stockOpname->harga,
+                // 'harga' => $stockOpname->harga,
                 'tanggal' => $stockOpname->tanggal,
             ];
             HistoryStock::create($historyData);
@@ -96,12 +94,6 @@ class StockController extends Controller
         }
     }
 
-
-
-
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         $stockOpname = StockOpname::find($id);
@@ -112,8 +104,8 @@ class StockController extends Controller
                 'nama_barang'   => $stockOpname->nama_barang,
                 'Jumlah'        => $stockOpname->jumlah,
                 'satuan'        => $stockOpname->satuan,
-                'Harga Satuan'  => $stockOpname->harga,
-                'jumlah'        => $stockOpname->jumlah * $stockOpname->harga,
+                // 'Harga Satuan'  => $stockOpname->harga,
+                // 'jumlah'        => $stockOpname->jumlah * $stockOpname->harga,
                 'bulan'         => $stockOpname->tanggal->format('F'),
                 'tahun'         => $stockOpname->tanggal->format('Y'),
             ];
@@ -152,7 +144,7 @@ class StockController extends Controller
                 'nama_barang' => 'required|string|max:255|unique:stock_opnames,nama_barang,' . $id,
                 'jumlah' => 'required|integer',
                 'satuan' => 'required|string|max:50',
-                'harga' => 'required|numeric',
+                // 'harga' => 'required|numeric',
                 'tanggal' => 'nullable|date_format:Y-m-d',
             ]);
 
@@ -169,7 +161,7 @@ class StockController extends Controller
                 'nama_barang' => $stockOpname->nama_barang,
                 'jumlah' => $stockOpname->jumlah,
                 'satuan' => $stockOpname->satuan,
-                'harga' => $stockOpname->harga,
+                // 'harga' => $stockOpname->harga,
                 'tanggal' => $stockOpname->tanggal,
             ];
 
@@ -198,10 +190,6 @@ class StockController extends Controller
     }
 
 
-
-
-
-
     /**
      * Remove the specified resource from storage.
      */
@@ -222,6 +210,47 @@ class StockController extends Controller
             'success' => true,
             'message' => 'Data stock opname berhasil dihapus',
             'data' => []
+        ], 200);
+    }
+
+    //cari data berdasarkan nama barang
+    public function search(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'query' => 'required|string|max:100',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $query = trim(strtolower($request->input('query')));
+
+        $results = StockOpname::all()->filter(function ($item) use ($query) {
+            return str_contains(strtolower($item->nama_barang), $query);
+        });
+
+        $formatted = $results->map(function ($item) {
+            return [
+                'id'            => $item->id,
+                'nama_barang'   => $item->nama_barang,
+                'Jumlah'        => $item->jumlah,
+                'satuan'        => $item->satuan,
+                // 'Harga Satuan'  => $item->harga,
+                // 'jumlah'        => $item->jumlah * $item->harga,
+                'bulan'         => optional($item->tanggal)->format('F'),
+                'tahun'         => optional($item->tanggal)->format('Y'),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => $formatted->isEmpty() ? 'Data tidak ditemukan' : 'Hasil pencarian',
+            'data'    => $formatted->values()
         ], 200);
     }
 }

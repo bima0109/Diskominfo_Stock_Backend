@@ -13,17 +13,13 @@ return new class extends Migration
     {
         Schema::create('permintaans', function (Blueprint $table) {
             $table->id();
-            $table->string('no_surat');
+            // $table->string('no_surat');
             $table->string('nama_barang');
             $table->integer('jumlah');
-            $table->string('satuan');
             $table->foreignId('id_stock_opname')->constrained('stock_opnames');
             // $table->foreignId('id_role')->constrained('roles');
-            $table->string('status');
-            $table->date('tanggal');
-            $table->text('keterangan')->nullable();
-            $table->foreignId('id_user')->constrained('users');
-            $table->foreignId('id_bidang')->constrained('bidangs');
+            $table->string('keterangan')->nullable();
+            $table->foreignId('id_verifikasi')->nullable()->constrained('verifikasis');
             $table->timestamps();
         });
     }

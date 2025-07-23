@@ -14,26 +14,23 @@ class RoleSeeder extends Seeder
     {
         $roles = [
             //rekap+tambah data
+            //1
             'SUPERADMIN',
 
             //admin bidang input permintaan 1
-            'ADMIN_IKP',
-            'ADMIN_PDKI',
-            'ADMIN_STATISTIK',
-            'ADMIN_EGOV',
-            'ADMIN_TIK',
-            'ADMIN_SEKRETARIAT',
+            //2
+            'ADMIN',
 
             //acc terakhir
+            //3
             'PPTKSEKRETARIAT',
 
-            // kabid perbidang acc 2
-            'KABID_IKP',
-            'KABID_TIK',
-            'KABID_STATISTIK',
-            'KABID_PDKI',
-            'KABID_EGOV',
-            // super admin acc 3 
+            // kabid perbidang acc 1
+            //4
+            'KABID',
+
+            // admin acc 2 
+            //5
             'UMPEG',
         ];
 

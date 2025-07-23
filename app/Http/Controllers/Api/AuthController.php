@@ -52,4 +52,25 @@ class AuthController extends Controller
             ]
         ], 200);
     }
+
+    // Logout user
+    public function logout(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user) {
+            // Menghapus token aktif
+            $request->user()->currentAccessToken()->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User logged out successfully',
+            ], 200);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'No authenticated user found.',
+        ], 401);
+    }
 }

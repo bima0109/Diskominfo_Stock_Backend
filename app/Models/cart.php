@@ -5,17 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Permintaan extends Model
+
+class cart extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'nama_barang',
-        'jumlah',
+        'id_user',
         'id_stock_opname',
-        'keterangan',
-        'id_verifikasi',
+        'jumlah',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'id_user');
+    }
 
     public function stockOpname()
     {

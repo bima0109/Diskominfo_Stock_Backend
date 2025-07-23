@@ -13,7 +13,7 @@ class HistoryStock extends Model
         'nama_barang',
         'jumlah',
         'satuan',
-        'harga',
+        // 'harga',
         'tanggal',
         'stock_opname_id',
     ];

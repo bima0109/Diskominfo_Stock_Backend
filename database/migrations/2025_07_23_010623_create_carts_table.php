@@ -11,13 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('stock_opnames', function (Blueprint $table) {
+        Schema::create('carts', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_barang');
-            $table->integer('jumlah');
-            $table->string('satuan');
-            $table->date('tanggal');
-            // $table->decimal('harga', 10, 2);
+            $table->foreignId('id_user')->constrained('users');
+            $table->foreignId('id_stock_opname')->constrained('stock_opnames');
+            $table->integer('jumlah')->default(1);
             $table->timestamps();
         });
     }
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stock_opnames');
+        Schema::dropIfExists('carts');
     }
 };
