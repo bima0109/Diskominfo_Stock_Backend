@@ -31,7 +31,7 @@ class RoleSeeder extends Seeder
 
             // admin acc 2 
             //5
-            'UMPEG',
+            'SEKRETARIAT',
         ];
 
         foreach ($roles as $role) {

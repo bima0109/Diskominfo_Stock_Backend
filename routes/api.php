@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\StockController;
 use App\Http\Controllers\Api\PermintaanController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\VerifikasiController;
+use App\Models\verifikasi;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,9 +50,12 @@ Route::middleware('auth:api')->group(function () {
     Route::delete('/stock/{id}', [StockController::class, 'destroy']);
     Route::post('/stock/search', [StockController::class, 'search']);
 
+    // Route untuk Verifikasi
+    Route::get('/verifikasi', [VerifikasiController::class, 'index']);
+
     // Route untuk Permintaan
-    Route::get('/permintaan', [PermintaanController::class, 'index']);
-    Route::post('/permintaan', [PermintaanController::class, 'store']);
+    Route::put('/permintaan/{id}', [PermintaanController::class, 'update']);
+    Route::delete('/permintaan/{id}', [PermintaanController::class, 'destroy']);
 
 
     // Tambahkan route API lain di sini (misal: /logout, /mobils, dll)

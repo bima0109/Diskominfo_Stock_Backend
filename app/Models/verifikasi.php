@@ -25,4 +25,8 @@ class verifikasi extends Model
     {
         return $this->belongsTo(Bidang::class, 'id_bidang');
     }
+    public function permintaans()
+    {
+        return $this->hasMany(Permintaan::class, 'id_verifikasi');
+    }
 }

@@ -195,22 +195,30 @@ class StockController extends Controller
      */
     public function destroy(string $id)
     {
-        $stockOpname = StockOpname::find($id);
-        if (!$stockOpname) {
+        try {
+            $stockOpname = StockOpname::find($id);
+            if (!$stockOpname) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data stock opname tidak ditemukan',
+                    'data' => []
+                ], 404);
+            }
+
+            $stockOpname->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data stock opname berhasil dihapus',
+                'data' => []
+            ], 200);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Data stock opname tidak ditemukan',
-                'data' => []
-            ], 404);
+                'message' => 'Terjadi kesalahan saat menghapus',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $stockOpname->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Data stock opname berhasil dihapus',
-            'data' => []
-        ], 200);
     }
 
     //cari data berdasarkan nama barang

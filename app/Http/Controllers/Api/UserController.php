@@ -86,10 +86,6 @@ class UserController extends Controller
         }
     }
 
-
-    /**
-     * Display the specified resource.
-     */
     public function show(Request $request)
     {
         try {
@@ -98,9 +94,12 @@ class UserController extends Controller
                 'username' => 'required|string'
             ]);
 
-            $username = $request->input('username');
+            $inputUsername = strtolower($request->input('username'));
 
-            $user = User::with(['role', 'bidang'])->where('username', $username)->first();
+            // Menggunakan whereRaw agar pencarian tidak case sensitive
+            $user = User::with(['role', 'bidang'])
+                ->whereRaw('LOWER(username) = ?', [$inputUsername])
+                ->first();
 
             if (!$user) {
                 return response()->json([
@@ -128,6 +127,8 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+
 
 
     /**
