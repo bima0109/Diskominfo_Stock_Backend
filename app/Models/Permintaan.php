@@ -12,7 +12,8 @@ class Permintaan extends Model
     protected $fillable = [
         'nama_barang',
         'jumlah',
-        'id_stock_opname',
+        'satuan',
+        'kode_barang',
         'keterangan',
         'id_verifikasi',
     ];

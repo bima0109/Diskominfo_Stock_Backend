@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\HistoryStock;
 use App\Models\StockOpname;
+use App\Models\BarangHabis;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 class StockController extends Controller
 {
@@ -16,36 +18,58 @@ class StockController extends Controller
      */
     public function index()
     {
-        // Ambil semua data stock_opnames yang jumlahnya lebih dari 0
-        $stockOpname = StockOpname::where('jumlah', '>', 0)->get();
+        try {
+            // Cek dan pindahkan data dengan jumlah == 0 ke tabel barang_habis
+            // $habis = StockOpname::where('jumlah', '=', 0)->get();
+            // foreach ($habis as $item) {
+            //     // Simpan ke tabel barang_habis
+            //     BarangHabis::create([
+            //         'nama_barang' => $item->nama_barang,
+            //         'tanggal'     => $item->tanggal,
+            //     ]);
 
-        if ($stockOpname->count() > 0) {
-            $formatted = $stockOpname->map(function ($item) {
-                return [
-                    'id'            => $item->id,
-                    'nama_barang'   => $item->nama_barang,
-                    'Jumlah'        => $item->jumlah,
-                    'satuan'        => $item->satuan,
-                    // 'Harga Satuan'  => $item->harga,
-                    // 'jumlah'        => $item->jumlah * $item->harga,
-                    'bulan'         => $item->tanggal->format('F'),
-                    'tahun'         => $item->tanggal->format('Y'),
-                ];
-            });
+            //     // Hapus dari stock_opname
+            //     $item->delete();
+            // }
+
+            // Ambil semua data stock_opnames yang jumlahnya > 0
+            $stockOpname = StockOpname::where('jumlah', '>', 0)->get();
+
+            if ($stockOpname->count() > 0) {
+                $formatted = $stockOpname->map(function ($item) {
+                    return [
+                        'id'            => $item->id,
+                        'nama_barang'   => $item->nama_barang,
+                        'Jumlah'        => $item->jumlah,
+                        'satuan'        => $item->satuan,
+                        'bulan'         => $item->tanggal->format('F'),
+                        'tahun'         => $item->tanggal->format('Y'),
+                    ];
+                });
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'List semua data stock opname (jumlah > 0)',
+                    'data'    => $formatted
+                ], 200);
+            }
 
             return response()->json([
-                'success' => true,
-                'message' => 'List semua data stock opname (jumlah > 0)',
-                'data'    => $formatted
-            ], 200);
+                'success' => false,
+                'message' => 'Data stock opname kosong',
+                'data'    => []
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data',
+                'error'   => $e->getMessage(),
+                'trace'   => $e->getTrace(), // Bisa dihapus di production
+            ], 500);
         }
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Data stock opname kosong',
-            'data'    => []
-        ], 404);
     }
+
+
 
 
     public function store(Request $request)
@@ -261,4 +285,33 @@ class StockController extends Controller
             'data'    => $formatted->values()
         ], 200);
     }
+
+    // public function habis()
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         $stockOpname = StockOpname::where('jumlah', '=', 0)->get();
+    //         foreach ($stockOpname as $item) {
+    //             HistoryStock::create([
+    //                 'nama_barang' => $item->nama_barang,
+    //                 'tanggal' => $item->tanggal,
+
+    //             ]);
+    //             $item->delete();
+    //         }
+    //         DB::commit();
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Data stock opname berhasil dipindahkan ke riwayat dan dihapus',
+    //             'data' => $stockOpname
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Terjadi kesalahan saat memproses data',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 }

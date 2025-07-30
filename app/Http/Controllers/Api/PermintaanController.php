@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Permintaan;
+use App\Models\StockOpname;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -52,16 +53,46 @@ class PermintaanController extends Controller
             ], 404);
         }
 
-        $permintaan->update($request->only([
-            'jumlah',
-            'keterangan',
-        ]));
+        $jumlahLama = $permintaan->jumlah;
+
+
+        $request->validate([
+            'jumlah' => 'required|integer',
+            'keterangan' => 'nullable|string',
+        ]);
+
+        $jumlahBaru = $request->input('jumlah');
+
+
+        $selisih = $jumlahBaru - $jumlahLama;
+
+
+        $stockOpname = StockOpname::find($permintaan->kode_barang);
+        if (!$stockOpname) {
+            return response()->json([
+                'message' => 'Stock Opname tidak ditemukan berdasarkan kode_barang'
+            ], 404);
+        }
+
+
+        $stockOpname->jumlah -= $selisih;
+        if ($stockOpname->jumlah < 0) {
+            return response()->json([
+                'message' => 'Stok tidak mencukupi untuk perubahan ini'
+            ], 422);
+        }
+        $stockOpname->save();
+
+
+        $permintaan->update($request->only(['jumlah', 'keterangan']));
 
         return response()->json([
             'message' => 'Permintaan updated successfully',
             'data' => $permintaan
         ]);
     }
+
+
 
     /**
      * Remove the specified resource from storage.

@@ -7,7 +7,9 @@ use App\Http\Controllers\Api\StockController;
 use App\Http\Controllers\Api\PermintaanController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VerifikasiController;
-use App\Models\verifikasi;
+use App\Http\Controllers\Api\HistoryStockController;
+use App\Http\Controllers\Api\BarangHabisController;
+use App\Models\BarangHabis;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,6 +59,8 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/permintaan/{id}', [PermintaanController::class, 'update']);
     Route::delete('/permintaan/{id}', [PermintaanController::class, 'destroy']);
 
-
-    // Tambahkan route API lain di sini (misal: /logout, /mobils, dll)
+    // Route untuk Data Rekap
+    Route::get('/masuk', [HistoryStockController::class, 'index']);
+    Route::get('/masih', [BarangHabisController::class, 'indexMasih']);
+    Route::get('/habis', [BarangHabisController::class, 'indexHabis']);
 });

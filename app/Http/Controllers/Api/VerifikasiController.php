@@ -14,7 +14,7 @@ class VerifikasiController extends Controller
     public function index()
     {
         try {
-            $verifikasis = Verifikasi::with(['user', 'bidang', 'permintaans.stockOpname'])->get();
+            $verifikasis = Verifikasi::with(['user', 'bidang', 'permintaans'])->get();
 
             return response()->json([
                 'success' => true,
