@@ -10,6 +10,7 @@ use App\Models\BarangHabis;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class StockController extends Controller
 {
@@ -31,7 +32,7 @@ class StockController extends Controller
             //     // Hapus dari stock_opname
             //     $item->delete();
             // }
-
+            Carbon::setLocale('id');
             // Ambil semua data stock_opnames yang jumlahnya > 0
             $stockOpname = StockOpname::where('jumlah', '>', 0)->get();
 
@@ -42,7 +43,7 @@ class StockController extends Controller
                         'nama_barang'   => $item->nama_barang,
                         'Jumlah'        => $item->jumlah,
                         'satuan'        => $item->satuan,
-                        'bulan'         => $item->tanggal->format('F'),
+                        'bulan'         => $item->tanggal->translatedFormat('F'),
                         'tahun'         => $item->tanggal->format('Y'),
                     ];
                 });
@@ -89,7 +90,7 @@ class StockController extends Controller
 
             //masukkan data ke dalam history stock
             $historyData = [
-                'stock_opname_id' => $stockOpname->id,
+                'id_stock' => $stockOpname->id,
                 'nama_barang' => $stockOpname->nama_barang,
                 'jumlah' => $stockOpname->jumlah,
                 'satuan' => $stockOpname->satuan,
@@ -164,33 +165,28 @@ class StockController extends Controller
                 ], 404);
             }
 
+            $tanggalLama = $stockOpname->tanggal; // Simpan tanggal lama sebelum update
+
             $validated = $request->validate([
                 'nama_barang' => 'required|string|max:255|unique:stock_opnames,nama_barang,' . $id,
                 'jumlah' => 'required|integer',
                 'satuan' => 'required|string|max:50',
-                // 'harga' => 'required|numeric',
                 'tanggal' => 'nullable|date_format:Y-m-d',
             ]);
 
-            //tanggal tidak diubah jika tidak ada input
-            if (empty($validated['tanggal'])) {
-                $validated['tanggal'] = $stockOpname->tanggal->format('Y-m-d');
-            } else {
-                $validated['tanggal'] = now()->format('Y-m-d');
-            }
+            // Paksa tanggal menjadi now() saat update
+            $validated['tanggal'] = now()->format('Y-m-d');
 
             $stockOpname->update($validated);
 
             $historyData = [
-                'nama_barang' => $stockOpname->nama_barang,
-                'jumlah' => $stockOpname->jumlah,
-                'satuan' => $stockOpname->satuan,
-                // 'harga' => $stockOpname->harga,
-                'tanggal' => $stockOpname->tanggal,
+                'nama_barang' => $validated['nama_barang'],
+                'jumlah' => $validated['jumlah'],
+                'satuan' => $validated['satuan'],
+                'tanggal' => $tanggalLama, // tetap gunakan tanggal lama untuk history
             ];
 
-            // update berdasarkan ID
-            HistoryStock::where('stock_opname_id', $stockOpname->id)
+            HistoryStock::where('id_stock', $stockOpname->id)
                 ->update($historyData);
 
             return response()->json([
@@ -212,6 +208,7 @@ class StockController extends Controller
             ], 500);
         }
     }
+
 
 
     /**
@@ -314,4 +311,6 @@ class StockController extends Controller
     //         ], 500);
     //     }
     // }
+
+
 }

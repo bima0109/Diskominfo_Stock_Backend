@@ -15,6 +15,7 @@ class HistoryStock extends Model
         'satuan',
         // 'harga',
         'tanggal',
+        'id_stock'
         // 'stock_opname_id',
     ];
 }

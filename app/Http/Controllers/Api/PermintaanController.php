@@ -113,10 +113,24 @@ class PermintaanController extends Controller
             ], 404);
         }
 
+        // Temukan data stok berdasarkan kode_barang dari permintaan
+        $stockOpname = StockOpname::find($permintaan->kode_barang);
+        if (!$stockOpname) {
+            return response()->json([
+                'message' => 'Stock Opname tidak ditemukan berdasarkan kode_barang'
+            ], 404);
+        }
+
+        // Tambahkan kembali jumlah yang sebelumnya dikurangi
+        $stockOpname->jumlah += $permintaan->jumlah;
+        $stockOpname->save();
+
+        // Hapus data permintaan
         $permintaan->delete();
 
         return response()->json([
-            'message' => 'Permintaan deleted successfully'
+            'message' => 'Permintaan deleted successfully and stock updated',
+            'updated_stock' => $stockOpname->jumlah
         ]);
     }
 }

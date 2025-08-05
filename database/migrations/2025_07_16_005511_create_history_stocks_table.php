@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('jumlah');
             $table->string('satuan');
             $table->date('tanggal');
+            $table->string('id_stock')->nullable();
             // $table->decimal('harga', 10, 2);
             // $table->unsignedBigInteger('stock_opname_id')->nullable();
             // $table->foreign('stock_opname_id')->references('id')->on('stock_opnames')->onDelete('cascade');

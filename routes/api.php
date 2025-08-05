@@ -9,7 +9,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\VerifikasiController;
 use App\Http\Controllers\Api\HistoryStockController;
 use App\Http\Controllers\Api\BarangHabisController;
-use App\Models\BarangHabis;
+use App\Http\Controllers\Api\CartController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,6 +54,11 @@ Route::middleware('auth:api')->group(function () {
 
     // Route untuk Verifikasi
     Route::get('/verifikasi', [VerifikasiController::class, 'index']);
+    Route::post('/verifikasi', [VerifikasiController::class, 'store']);
+    Route::get('/veribid', [VerifikasiController::class, 'getByBidang']);
+    Route::put('/verif-kabid/{id}', [VerifikasiController::class, 'setVerifKabid']);
+    Route::put('/verif-sekre/{id}', [VerifikasiController::class, 'setVerifSekre']);
+    Route::put('/verif-pptk/{id}', [VerifikasiController::class, 'setVerifPptk']);
 
     // Route untuk Permintaan
     Route::put('/permintaan/{id}', [PermintaanController::class, 'update']);
@@ -63,4 +68,10 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/masuk', [HistoryStockController::class, 'index']);
     Route::get('/masih', [BarangHabisController::class, 'indexMasih']);
     Route::get('/habis', [BarangHabisController::class, 'indexHabis']);
+
+    //Route untuk cart
+    Route::get('/cart', [CartController::class, 'index']);
+    Route::post('/cart', [CartController::class, 'store']);
+    Route::put('/cart/{id}', [CartController::class, 'update']);
+    Route::delete('/cart/{id}', [CartController::class, 'destroy']);
 });
