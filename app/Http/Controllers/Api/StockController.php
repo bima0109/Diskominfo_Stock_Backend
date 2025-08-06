@@ -33,8 +33,9 @@ class StockController extends Controller
             //     $item->delete();
             // }
             Carbon::setLocale('id');
-            // Ambil semua data stock_opnames yang jumlahnya > 0
-            $stockOpname = StockOpname::where('jumlah', '>', 0)->get();
+            // Ambil semua data stock_opnames 
+            $stockOpname = StockOpname::all();
+            // $stockOpname = StockOpname::where('jumlah', '>', 0)->get();
 
             if ($stockOpname->count() > 0) {
                 $formatted = $stockOpname->map(function ($item) {

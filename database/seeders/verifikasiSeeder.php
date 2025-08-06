@@ -24,7 +24,7 @@ class verifikasiSeeder extends Seeder
             ],
             [
                 'tanggal' => '2024-07-24',
-                'status' => 'ACC SEKRETARIAT',
+                'status' => 'ACC SEKRETARIS',
                 'id_user' => 3,
                 'id_bidang' => 2,
                 'created_at' => now(),

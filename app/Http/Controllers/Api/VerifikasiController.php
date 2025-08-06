@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\Models\Cart;
 use App\Models\Permintaan;
-use App\Models\StockOpname;
 
 class VerifikasiController extends Controller
 {
@@ -212,6 +211,43 @@ class VerifikasiController extends Controller
         }
     }
 
+    public function diproses()
+    {
+        try {
+            $user = Auth::user();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+
+            $verifikasis = Verifikasi::with(['permintaans', 'bidang'])
+                ->where('status', 'DIPROSES')
+                ->where('id_bidang', $user->id_bidang)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data verifikasi dengan status DIPROSES berhasil diambil',
+                'total' => $verifikasis->count(),
+                'data' => $verifikasis,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Gagal mengambil data verifikasi diproses: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data',
+                'error' => config('app.debug') ? $e->getMessage() : 'Silakan coba lagi nanti'
+            ], 500);
+        }
+    }
+
+
     public function setVerifSekre(Request $request, $id)
     {
         try {
@@ -242,6 +278,32 @@ class VerifikasiController extends Controller
             Log::error('Gagal update status verifikasi: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Terjadi kesalahan saat mengupdate status verifikasi',
+                'error' => config('app.debug') ? $e->getMessage() : 'Silakan coba lagi nanti'
+            ], 500);
+        }
+    }
+
+    public function accKabid()
+    {
+        try {
+
+            $verifikasis = Verifikasi::with(['permintaans', 'bidang'])
+                ->where('status', 'ACC KABID')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data verifikasi dengan status ACC KABID berhasil diambil',
+                'total' => $verifikasis->count(),
+                'data' => $verifikasis,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Gagal mengambil data verifikasi ACC KABID: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data',
                 'error' => config('app.debug') ? $e->getMessage() : 'Silakan coba lagi nanti'
             ], 500);
         }
@@ -283,27 +345,28 @@ class VerifikasiController extends Controller
     }
 
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function accSekre()
     {
-        //
-    }
+        try {
+            $verifikasis = Verifikasi::with(['permintaans', 'bidang'])
+                ->where('status', 'ACC SEKRETARIS')
+                ->orderBy('created_at', 'desc')
+                ->get();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+            return response()->json([
+                'success' => true,
+                'message' => 'Data verifikasi dengan status ACC SEKRETARIS berhasil diambil',
+                'total' => $verifikasis->count(),
+                'data' => $verifikasis,
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Gagal mengambil data verifikasi ACC SEKRETARIS: ' . $e->getMessage());
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data',
+                'error' => config('app.debug') ? $e->getMessage() : 'Silakan coba lagi nanti'
+            ], 500);
+        }
     }
 }

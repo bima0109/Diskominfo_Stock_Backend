@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Exception;
 
 class UserController extends Controller
@@ -249,6 +250,95 @@ class UserController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat mereset password',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getProfile(Request $request)
+    {
+        try {
+            $user = Auth::user();
+
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User tidak terautentikasi',
+                    'data' => []
+                ], 401);
+            }
+
+            $user = User::with(['role', 'bidang'])->find($user->id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profil user berhasil diambil',
+                'data' => $user
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil profil user',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updatePassword(Request $request)
+    {
+        try {
+            $authUser = Auth::user();
+
+            if (!$authUser) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User tidak terautentikasi',
+                ], 401);
+            }
+
+            // Ensure $user is an Eloquent model instance
+            $user = User::find($authUser->id);
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User tidak ditemukan',
+                ], 404);
+            }
+
+            // Validasi input
+            $validator = Validator::make($request->all(), [
+                'current_password' => 'required|string',
+                'new_password' => 'required|string|min:6|confirmed',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validasi gagal',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            // Cek apakah password lama cocok
+            if (!Hash::check($request->current_password, $user->password)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Password lama tidak sesuai',
+                ], 400);
+            }
+
+            // Update password
+            $user->password = Hash::make($request->new_password);
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Password berhasil diperbarui',
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memperbarui password',
                 'error' => $e->getMessage()
             ], 500);
         }

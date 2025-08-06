@@ -43,6 +43,8 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/users/{id}', [UserController::class, 'update']);
     Route::delete('/users/{id}', [UserController::class, 'destroy']);
     Route::put('/users-reset/{id}', [UserController::class, 'resetPassword']);
+    Route::get('/profile', [UserController::class, 'getProfile']);
+    Route::put('/profile', [UserController::class, 'updatePassword']);
 
     //Route untuk Stock Opname
     Route::get('/stock', [StockController::class, 'index']);
@@ -57,8 +59,11 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/verifikasi', [VerifikasiController::class, 'store']);
     Route::get('/veribid', [VerifikasiController::class, 'getByBidang']);
     Route::put('/verif-kabid/{id}', [VerifikasiController::class, 'setVerifKabid']);
+    Route::get('/verif-kabid', [VerifikasiController::class, 'diproses']);
     Route::put('/verif-sekre/{id}', [VerifikasiController::class, 'setVerifSekre']);
+    Route::get('/verif-sekre', [VerifikasiController::class, 'accKabid']);
     Route::put('/verif-pptk/{id}', [VerifikasiController::class, 'setVerifPptk']);
+    Route::get('/verif-pptk', [VerifikasiController::class, 'accSekre']);
 
     // Route untuk Permintaan
     Route::put('/permintaan/{id}', [PermintaanController::class, 'update']);
