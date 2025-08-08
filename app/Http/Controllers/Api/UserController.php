@@ -255,7 +255,7 @@ class UserController extends Controller
         }
     }
 
-    public function getProfile(Request $request)
+    public function getProfile()
     {
         try {
             $user = Auth::user();
@@ -339,6 +339,59 @@ class UserController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat memperbarui password',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function updateProfile(Request $request)
+    {
+        try {
+            $authUser = Auth::user();
+
+            if (!$authUser) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User tidak terautentikasi',
+                ], 401);
+            }
+
+            $user = User::find($authUser->id);
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User tidak ditemukan',
+                ], 404);
+            }
+
+            $validator = Validator::make($request->all(), [
+                'nama' => 'sometimes|required|string|max:255',
+                'username' => 'sometimes|required|string|unique:users,username,' . $user->id,
+                'id_role' => 'sometimes|required|exists:roles,id',
+                'id_bidang' => 'sometimes|required|exists:bidangs,id',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validasi gagal',
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            // Update field yang diizinkan
+            $user->fill($request->only(['nama', 'username', 'id_role', 'id_bidang']));
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profil berhasil diperbarui',
+                'data' => $user
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memperbarui profil',
                 'error' => $e->getMessage()
             ], 500);
         }
