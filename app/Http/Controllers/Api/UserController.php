@@ -367,8 +367,8 @@ class UserController extends Controller
             $validator = Validator::make($request->all(), [
                 'nama' => 'sometimes|required|string|max:255',
                 'username' => 'sometimes|required|string|unique:users,username,' . $user->id,
-                'id_role' => 'sometimes|required|exists:roles,id',
-                'id_bidang' => 'sometimes|required|exists:bidangs,id',
+                // 'id_role' => 'sometimes|required|exists:roles,id',
+                // 'id_bidang' => 'sometimes|required|exists:bidangs,id',
             ]);
 
             if ($validator->fails()) {
@@ -380,7 +380,7 @@ class UserController extends Controller
             }
 
             // Update field yang diizinkan
-            $user->fill($request->only(['nama', 'username', 'id_role', 'id_bidang']));
+            $user->fill($request->only(['nama', 'username']));
             $user->save();
 
             return response()->json([

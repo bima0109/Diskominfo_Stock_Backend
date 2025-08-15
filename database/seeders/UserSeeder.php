@@ -12,25 +12,25 @@ class UserSeeder extends Seeder
     {
         $users = [
             [
-                'nama' => 'Budi Setiawan',
+                'nama' => 'Lulut',
                 'username' => 'adminSuperman',
                 'id_role' => 1,
-                'id_bidang' => 1,
+                'id_bidang' => 3,
                 'role' => 'SUPERADMIN',
             ],
             [
-                'nama' => 'Joko Widodo',
+                'nama' => 'Oriza',
                 'username' => 'admin.ikp',
                 'id_role' => 2,
                 'id_bidang' => 1,
                 'role' => 'ADMIN',
             ],
             [
-                'nama' => 'Gina Pratiwi',
-                'username' => 'umpeg.oke',
+                'nama' => 'Galih',
+                'username' => 'Sekretaris',
                 'id_role' => 5,
-                'id_bidang' => 2,
-                'role' => 'UMPEG',
+                'id_bidang' => 3,
+                'role' => 'SEKRETARIS',
             ],
             [
                 'nama' => 'Tria Kusuma',
