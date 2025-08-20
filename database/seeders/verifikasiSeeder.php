@@ -36,7 +36,7 @@ class verifikasiSeeder extends Seeder
             ],
             [
                 'tanggal' => '2025-04-24',
-                'status' => 'ACC PPTKSEKRETARIAT',
+                'status' => 'ACC PPTK SEKRETARIAT',
                 'id_user' => 4,
                 'id_bidang' => 6,
                 'menyetujui' => 'Hotman Paris',

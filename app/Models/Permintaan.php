@@ -17,6 +17,7 @@ class Permintaan extends Model
         'keterangan_1',
         'keterangan_2',
         'keterangan_3',
+        'keterangan_4',
         'id_verifikasi',
     ];
 

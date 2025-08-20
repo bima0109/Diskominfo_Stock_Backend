@@ -58,7 +58,10 @@ class PermintaanController extends Controller
 
         $request->validate([
             'jumlah' => 'required|integer',
-            'keterangan' => 'nullable|string',
+            'keterangan_1' => 'nullable|string',
+            'keterangan_2' => 'nullable|string',
+            'keterangan_3' => 'nullable|string',
+            'keterangan_4' => 'nullable|string',
         ]);
 
         $jumlahBaru = $request->input('jumlah');

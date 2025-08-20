@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('keterangan_1')->nullable();
             $table->string('keterangan_2')->nullable();
             $table->string('keterangan_3')->nullable();
+            $table->string('keterangan_4')->nullable();
             $table->foreignId('id_verifikasi')->nullable()->constrained('verifikasis');
             $table->timestamps();
         });

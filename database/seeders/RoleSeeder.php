@@ -23,7 +23,7 @@ class RoleSeeder extends Seeder
 
             //acc terakhir
             //3
-            'PPTKSEKRETARIAT',
+            'PPTK SEKRETARIAT',
 
             // kabid perbidang acc 1
             //4

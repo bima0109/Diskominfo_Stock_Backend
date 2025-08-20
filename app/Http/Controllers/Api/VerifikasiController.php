@@ -55,7 +55,7 @@ class VerifikasiController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'tanggal' => now(),
-                'status' => 'nullable|string|in:DIPROSES,ACC KABID,ACC SEKRETARIAT,ACC PPTKSEKRETARIAT',
+                'status' => 'nullable|string|in:DIPROSES,ACC KABID,ACC SEKRETARIAT,ACC PPTK SEKRETARIAT',
             ]);
 
             if ($validator->fails()) {
@@ -352,7 +352,7 @@ class VerifikasiController extends Controller
     {
         try {
             $user = Auth::user();
-            if (!$user || $user->role !== 'PPTKSEKRETARIAT') {
+            if (!$user || $user->role !== 'PPTK SEKRETARIAT') {
                 return response()->json(['message' => 'Unauthorized'], 401);
             }
 
@@ -367,7 +367,7 @@ class VerifikasiController extends Controller
                 ], 404);
             }
             // Update status
-            $verifikasi->status = 'ACC PPTKSEKRETARIAT';
+            $verifikasi->status = 'ACC PPTK SEKRETARIAT';
             $verifikasi->menyetujui = $user->nama;
             $verifikasi->tanggal_acc = now();
             $verifikasi->save();

@@ -65,7 +65,7 @@ class UserSeeder extends Seeder
                 'username' => 'pptkSekre',
                 'id_role' => 3,
                 'id_bidang' => 3,
-                'role' => 'PPTKSEKRETARIAT',
+                'role' => 'PPTK SEKRETARIAT',
             ],
             [
                 'nama' => 'Layla Salsabila',
