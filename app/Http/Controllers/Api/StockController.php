@@ -32,6 +32,7 @@ class StockController extends Controller
                         'nama_barang'   => $item->nama_barang,
                         'Jumlah'        => $item->jumlah,
                         'satuan'        => $item->satuan,
+                        'Harga Satuan'  => $item->harga,
                         'bulan'         => $item->tanggal->translatedFormat('F'),
                         'tahun'         => $item->tanggal->format('Y'),
                     ];
@@ -70,7 +71,7 @@ class StockController extends Controller
                 'nama_barang' => 'required|string|max:255|unique:stock_opnames,nama_barang',
                 'jumlah' => 'required|integer',
                 'satuan' => 'required|string|max:50',
-                // 'harga' => 'required|numeric',
+                'harga' => 'required|numeric',
                 'tanggal' => 'nullable|date_format:Y-m-d',
             ]);
             $validated['tanggal'] = $validated['tanggal'] ?? now()->format('Y-m-d');
@@ -83,7 +84,7 @@ class StockController extends Controller
                 'nama_barang' => $stockOpname->nama_barang,
                 'jumlah' => $stockOpname->jumlah,
                 'satuan' => $stockOpname->satuan,
-                // 'harga' => $stockOpname->harga,
+                'harga' => $stockOpname->harga,
                 'tanggal' => $stockOpname->tanggal,
             ];
             HistoryStock::create($historyData);
@@ -118,8 +119,8 @@ class StockController extends Controller
                 'nama_barang'   => $stockOpname->nama_barang,
                 'Jumlah'        => $stockOpname->jumlah,
                 'satuan'        => $stockOpname->satuan,
-                // 'Harga Satuan'  => $stockOpname->harga,
-                // 'jumlah'        => $stockOpname->jumlah * $stockOpname->harga,
+                'Harga Satuan'  => $stockOpname->harga,
+                'jumlah'        => $stockOpname->jumlah * $stockOpname->harga,
                 'bulan'         => $stockOpname->tanggal->format('F'),
                 'tahun'         => $stockOpname->tanggal->format('Y'),
             ];
@@ -161,6 +162,7 @@ class StockController extends Controller
                 'jumlah' => 'required|integer',
                 'satuan' => 'required|string|max:50',
                 'tanggal' => 'nullable|date_format:Y-m-d',
+                'harga' => 'required|numeric',
             ]);
 
             // Paksa tanggal menjadi now() saat update

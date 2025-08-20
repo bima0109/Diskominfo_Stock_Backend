@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('status')->nullable();
             $table->foreignId('id_user')->constrained('users');
             $table->foreignId('id_bidang')->constrained('bidangs');
+            $table->string('menyetujui')->nullable();
+            $table->date('tanggal_acc')->nullable();
             $table->timestamps();
         });
     }

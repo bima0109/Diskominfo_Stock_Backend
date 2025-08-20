@@ -13,7 +13,7 @@ class StockOpname extends Model
         'nama_barang',
         'jumlah',
         'satuan',
-        // 'harga',
+        'harga',
         'tanggal',
     ];
     protected $casts = [

@@ -22,6 +22,16 @@ class VerifikasiController extends Controller
         try {
             $verifikasis = Verifikasi::with(['user', 'bidang', 'permintaans'])->get();
 
+
+            $verifikasis->map(function ($verifikasi) {
+                $verifikasi->permintaans->map(function ($permintaan) {
+                    $stock = DB::table('stock_opnames')->where('id', $permintaan->kode_barang)->first();
+                    $permintaan->jumlah_stock = $stock ? $stock->jumlah : 0;
+                    return $permintaan;
+                });
+                return $verifikasi;
+            });
+
             return response()->json([
                 'success' => true,
                 'data' => $verifikasis,
@@ -34,6 +44,7 @@ class VerifikasiController extends Controller
             ], 500);
         }
     }
+
 
 
     /**
@@ -155,6 +166,15 @@ class VerifikasiController extends Controller
                 ->orderBy('tanggal', 'desc')
                 ->get();
 
+            $verifikasis->map(function ($verifikasi) {
+                $verifikasi->permintaans->map(function ($permintaan) {
+                    $stock = DB::table('stock_opnames')->where('id', $permintaan->kode_barang)->first();
+                    $permintaan->jumlah_stock = $stock ? $stock->jumlah : 0;
+                    return $permintaan;
+                });
+                return $verifikasi;
+            });
+
             return response()->json([
                 'success' => true,
                 'data' => $verifikasis,
@@ -230,6 +250,16 @@ class VerifikasiController extends Controller
                 ->get();
 
 
+            $verifikasis->map(function ($verifikasi) {
+                $verifikasi->permintaans->map(function ($permintaan) {
+                    $stock = DB::table('stock_opnames')->where('id', $permintaan->kode_barang)->first();
+                    $permintaan->jumlah_stock = $stock ? $stock->jumlah : 0;
+                    return $permintaan;
+                });
+                return $verifikasi;
+            });
+
+
             return response()->json([
                 'success' => true,
                 'message' => 'Data verifikasi dengan status DIPROSES berhasil diambil',
@@ -292,6 +322,15 @@ class VerifikasiController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
 
+            $verifikasis->map(function ($verifikasi) {
+                $verifikasi->permintaans->map(function ($permintaan) {
+                    $stock = DB::table('stock_opnames')->where('id', $permintaan->kode_barang)->first();
+                    $permintaan->jumlah_stock = $stock ? $stock->jumlah : 0;
+                    return $permintaan;
+                });
+                return $verifikasi;
+            });
+
             return response()->json([
                 'success' => true,
                 'message' => 'Data verifikasi dengan status ACC KABID berhasil diambil',
@@ -329,6 +368,8 @@ class VerifikasiController extends Controller
             }
             // Update status
             $verifikasi->status = 'ACC PPTKSEKRETARIAT';
+            $verifikasi->menyetujui = $user->nama;
+            $verifikasi->tanggal_acc = now();
             $verifikasi->save();
 
             return response()->json([
@@ -352,6 +393,15 @@ class VerifikasiController extends Controller
                 ->where('status', 'ACC SEKRETARIS')
                 ->orderBy('created_at', 'desc')
                 ->get();
+
+            $verifikasis->map(function ($verifikasi) {
+                $verifikasi->permintaans->map(function ($permintaan) {
+                    $stock = DB::table('stock_opnames')->where('id', $permintaan->kode_barang)->first();
+                    $permintaan->jumlah_stock = $stock ? $stock->jumlah : 0;
+                    return $permintaan;
+                });
+                return $verifikasi;
+            });
 
             return response()->json([
                 'success' => true,

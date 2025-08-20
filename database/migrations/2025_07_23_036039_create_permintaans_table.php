@@ -19,7 +19,9 @@ return new class extends Migration
             $table->string('satuan');
             $table->integer('kode_barang');
             // $table->foreignId('id_role')->constrained('roles');
-            $table->string('keterangan')->nullable();
+            $table->string('keterangan_1')->nullable();
+            $table->string('keterangan_2')->nullable();
+            $table->string('keterangan_3')->nullable();
             $table->foreignId('id_verifikasi')->nullable()->constrained('verifikasis');
             $table->timestamps();
         });
