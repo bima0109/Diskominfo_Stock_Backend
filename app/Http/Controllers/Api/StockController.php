@@ -236,6 +236,7 @@ class StockController extends Controller
     //cari data berdasarkan nama barang
     public function search(Request $request)
     {
+        Carbon::setLocale('id');
         $validator = Validator::make($request->all(), [
             'query' => 'required|string|max:100',
         ]);
@@ -260,9 +261,9 @@ class StockController extends Controller
                 'nama_barang'   => $item->nama_barang,
                 'Jumlah'        => $item->jumlah,
                 'satuan'        => $item->satuan,
-                // 'Harga Satuan'  => $item->harga,
-                // 'jumlah'        => $item->jumlah * $item->harga,
-                'bulan'         => optional($item->tanggal)->format('F'),
+                'Harga Satuan'  => $item->harga,
+                'jumlah'        => $item->jumlah * $item->harga,
+                'bulan'         => optional($item->tanggal)->translatedFormat('F'),
                 'tahun'         => optional($item->tanggal)->format('Y'),
             ];
         });
