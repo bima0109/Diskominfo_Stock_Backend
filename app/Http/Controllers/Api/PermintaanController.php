@@ -58,10 +58,10 @@ class PermintaanController extends Controller
 
         $request->validate([
             'jumlah' => 'required|integer',
-            'keterangan_1' => 'nullable|string',
-            'keterangan_2' => 'nullable|string',
-            'keterangan_3' => 'nullable|string',
-            'keterangan_4' => 'nullable|string',
+            'ketSuper' => 'nullable|string',
+            'ketKabid' => 'nullable|string',
+            'ketSekre' => 'nullable|string',
+            'ketPptk' => 'nullable|string',
         ]);
 
         $jumlahBaru = $request->input('jumlah');
@@ -87,7 +87,8 @@ class PermintaanController extends Controller
         $stockOpname->save();
 
 
-        $permintaan->update($request->only(['jumlah', 'keterangan']));
+        $permintaan->update($request->only(['jumlah', 'ketSuper', 'ketKabid', 'ketSekre', 'ketPptk']));
+
 
         return response()->json([
             'message' => 'Permintaan updated successfully',

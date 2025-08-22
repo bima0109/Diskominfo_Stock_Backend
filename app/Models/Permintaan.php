@@ -14,10 +14,10 @@ class Permintaan extends Model
         'jumlah',
         'satuan',
         'kode_barang',
-        'keterangan_1',
-        'keterangan_2',
-        'keterangan_3',
-        'keterangan_4',
+        'ketSuper',
+        'ketKabid',
+        'ketSekre',
+        'ketPptk',
         'id_verifikasi',
     ];
 
