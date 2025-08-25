@@ -60,6 +60,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/verifikasi', [VerifikasiController::class, 'index']);
     Route::post('/verifikasi', [VerifikasiController::class, 'store']);
     Route::get('/veribid', [VerifikasiController::class, 'getByBidang']);
+    Route::post('/rekap-tahunan', [VerifikasiController::class, 'getRekapTahunan']);
     Route::put('/verif-kabid/{id}', [VerifikasiController::class, 'setVerifKabid']);
     Route::get('/verif-kabid', [VerifikasiController::class, 'diproses']);
     Route::put('/verif-sekre/{id}', [VerifikasiController::class, 'setVerifSekre']);

@@ -55,7 +55,7 @@ class VerifikasiController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'tanggal' => now(),
-                'status' => 'nullable|string|in:DIPROSES,ACC KABID,ACC SEKRETARIAT,ACC PPTK SEKRETARIAT',
+                'status' => 'nullable|string|in:DIPROSES,ACC KABID,ACC SEKRETARIAT,ACC PPTKSEKRETARIAT',
             ]);
 
             if ($validator->fails()) {
@@ -187,6 +187,59 @@ class VerifikasiController extends Controller
             ], 500);
         }
     }
+
+    public function getRekapTahunan(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
+
+            if (!$user->id_bidang) {
+                return response()->json(['message' => 'User tidak memiliki bidang'], 400);
+            }
+
+            $tahun = $request->get('tahun', date('Y'));
+            $verifikasis = Verifikasi::with('permintaans')
+                ->where('id_bidang', $user->id_bidang)
+                ->whereYear('tanggal', $tahun)
+                ->where('status', 'ACC PPTK SEKRETARIAT')
+                ->get();
+
+            $rekap = [];
+            foreach ($verifikasis as $verifikasi) {
+                foreach ($verifikasi->permintaans as $permintaan) {
+                    $kode = $permintaan->kode_barang;
+
+                    if (!isset($rekap[$kode])) {
+                        $rekap[$kode] = [
+                            'kode_barang' => $kode,
+                            'nama_barang' => $permintaan->nama_barang,
+                            'satuan'      => $permintaan->satuan,
+                            'jumlah'      => 0,
+                        ];
+                    }
+                    $rekap[$kode]['jumlah'] += $permintaan->jumlah;
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'tahun'   => $tahun,
+                'data'    => array_values($rekap),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil rekap tahunan',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
 
     public function setVerifKabid(Request $request, $id)
     {
@@ -384,8 +437,6 @@ class VerifikasiController extends Controller
             ], 500);
         }
     }
-
-
     public function accSekre()
     {
         try {
