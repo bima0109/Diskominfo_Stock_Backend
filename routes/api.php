@@ -76,11 +76,11 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/masuk', [HistoryStockController::class, 'index']);
     Route::get('/masih', [BarangHabisController::class, 'indexMasih']);
     Route::get('/habis', [BarangHabisController::class, 'indexHabis']);
-    Route::post('/masih', [StockController::class, 'Masih']);
-    Route::post('/habis', [StockController::class, 'Habis']);
-    Route::put('/masih/{id}', [BarangHabisController::class, 'updateTanggalMasih']);
-    Route::put('/habis/{id}', [BarangHabisController::class, 'updateTanggalHabis']);
-    Route::put('/masuk/{id}', [HistoryStockController::class, 'updateTanggal']);
+    // Route::post('/masih', [StockController::class, 'Masih']);
+    // Route::post('/habis', [StockController::class, 'Habis']);
+    // Route::put('/masih/{id}', [BarangHabisController::class, 'updateTanggalMasih']);
+    // Route::put('/habis/{id}', [BarangHabisController::class, 'updateTanggalHabis']);
+    // Route::put('/masuk/{id}', [HistoryStockController::class, 'updateTanggal']);
 
 
     //Route untuk cart

@@ -21,46 +21,101 @@ class StockController extends Controller
     {
         try {
             Carbon::setLocale('id');
-            // Ambil semua data stock_opnames 
+
+            $now = Carbon::now();
+            $currentMonth = $now->month;
+            $currentYear = $now->year;
+
+            DB::beginTransaction();
+
+            // Ambil semua stok dari tabel utama
+            $stockItems = StockOpname::all();
+
+            foreach ($stockItems as $item) {
+                // Cek apakah data ini sudah ada di BarangMasih / BarangHabis untuk bulan ini
+                $alreadyInMasih = BarangMasih::where('nama_barang', $item->nama_barang)
+                    ->whereMonth('tanggal', $currentMonth)
+                    ->whereYear('tanggal', $currentYear)
+                    ->exists();
+
+                $alreadyInHabis = BarangHabis::where('nama_barang', $item->nama_barang)
+                    ->whereMonth('tanggal', $currentMonth)
+                    ->whereYear('tanggal', $currentYear)
+                    ->exists();
+
+                // Jika jumlah > 0, dan data belum ada di BarangMasih bulan ini, insert
+                if ($item->jumlah > 0 && !$alreadyInMasih) {
+                    BarangMasih::create([
+                        'nama_barang' => $item->nama_barang,
+                        'jumlah' => $item->jumlah,
+                        'satuan' => $item->satuan,
+                        'tanggal' => $now->format('Y-m-d'),
+                    ]);
+                }
+
+                // Jika jumlah == 0, dan data belum ada di BarangHabis bulan ini, insert
+                if ($item->jumlah == 0 && !$alreadyInHabis) {
+                    BarangHabis::create([
+                        'nama_barang' => $item->nama_barang,
+                        'tanggal' => $now->format('Y-m-d'),
+                    ]);
+                }
+
+                // Realtime update: hapus dari tabel yang tidak sesuai dengan jumlah sekarang
+                if ($item->jumlah == 0) {
+                    // jika jumlah 0, hapus dari barangmasih bulan ini
+                    BarangMasih::where('nama_barang', $item->nama_barang)
+                        ->whereMonth('tanggal', $currentMonth)
+                        ->whereYear('tanggal', $currentYear)
+                        ->delete();
+                } else {
+                    // jika jumlah > 0, hapus dari baranghabis bulan ini
+                    BarangHabis::where('nama_barang', $item->nama_barang)
+                        ->whereMonth('tanggal', $currentMonth)
+                        ->whereYear('tanggal', $currentYear)
+                        ->delete();
+                }
+            }
+
+            DB::commit();
+
             $stockOpname = StockOpname::all();
-            // $stockOpname = StockOpname::where('jumlah', '>', 0)->get();
 
             if ($stockOpname->count() > 0) {
                 $formatted = $stockOpname->map(function ($item) {
                     return [
-                        'id'            => $item->id,
-                        'nama_barang'   => $item->nama_barang,
-                        'Jumlah'        => $item->jumlah,
-                        'satuan'        => $item->satuan,
-                        'Harga Satuan'  => $item->harga,
-                        'bulan'         => $item->tanggal->translatedFormat('F'),
-                        'tahun'         => $item->tanggal->format('Y'),
+                        'id' => $item->id,
+                        'nama_barang' => $item->nama_barang,
+                        'Jumlah' => $item->jumlah,
+                        'satuan' => $item->satuan,
+                        'Harga Satuan' => $item->harga,
+                        'bulan' => $item->tanggal->translatedFormat('F'),
+                        'tahun' => $item->tanggal->format('Y'),
                     ];
                 });
 
                 return response()->json([
                     'success' => true,
                     'message' => 'List semua data stock opname (jumlah > 0)',
-                    'data'    => $formatted
+                    'data' => $formatted
                 ], 200);
             }
 
             return response()->json([
                 'success' => false,
                 'message' => 'Data stock opname kosong',
-                'data'    => []
+                'data' => []
             ], 404);
         } catch (\Exception $e) {
+            DB::rollBack();
+
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat mengambil data',
-                'error'   => $e->getMessage(),
-                'trace'   => $e->getTrace(), // Bisa dihapus di production
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
-
-
 
 
     public function store(Request $request)
@@ -115,27 +170,27 @@ class StockController extends Controller
 
         if ($stockOpname) {
             $formatted = [
-                'id'            => $stockOpname->id,
-                'nama_barang'   => $stockOpname->nama_barang,
-                'Jumlah'        => $stockOpname->jumlah,
-                'satuan'        => $stockOpname->satuan,
-                'Harga Satuan'  => $stockOpname->harga,
-                'jumlah'        => $stockOpname->jumlah * $stockOpname->harga,
-                'bulan'         => $stockOpname->tanggal->format('F'),
-                'tahun'         => $stockOpname->tanggal->format('Y'),
+                'id' => $stockOpname->id,
+                'nama_barang' => $stockOpname->nama_barang,
+                'Jumlah' => $stockOpname->jumlah,
+                'satuan' => $stockOpname->satuan,
+                'Harga Satuan' => $stockOpname->harga,
+                'jumlah' => $stockOpname->jumlah * $stockOpname->harga,
+                'bulan' => $stockOpname->tanggal->format('F'),
+                'tahun' => $stockOpname->tanggal->format('Y'),
             ];
 
             return response()->json([
                 'success' => true,
                 'message' => 'Detail data stock opname',
-                'data'    => $formatted
+                'data' => $formatted
             ], 200);
         }
 
         return response()->json([
             'success' => false,
             'message' => 'Data stock opname tidak ditemukan',
-            'data'    => []
+            'data' => []
         ], 404);
     }
 
@@ -169,6 +224,47 @@ class StockController extends Controller
             $validated['tanggal'] = now()->format('Y-m-d');
 
             $stockOpname->update($validated);
+
+            // Cek apakah status jumlah berubah dan update barangmasih / baranghabis
+            $currentMonth = now()->month;
+            $currentYear = now()->year;
+
+            if ($validated['jumlah'] == 0) {
+                // Pindah ke BarangHabis
+                // Hapus dari BarangMasih jika sebelumnya masih
+                BarangMasih::where('nama_barang', $validated['nama_barang'])
+                    ->whereMonth('tanggal', $currentMonth)
+                    ->whereYear('tanggal', $currentYear)
+                    ->delete();
+
+                // Tambah ke BarangHabis (jika belum ada)
+                BarangHabis::updateOrCreate(
+                    [
+                        'nama_barang' => $validated['nama_barang'],
+                        'tanggal' => now()->format('Y-m-d'),
+                    ],
+                    [] // tidak ada field tambahan
+                );
+            } else {
+                // Pindah ke BarangMasih
+                // Hapus dari BarangHabis jika sebelumnya habis
+                BarangHabis::where('nama_barang', $validated['nama_barang'])
+                    ->whereMonth('tanggal', $currentMonth)
+                    ->whereYear('tanggal', $currentYear)
+                    ->delete();
+
+                // Tambah/update di BarangMasih
+                BarangMasih::updateOrCreate(
+                    [
+                        'nama_barang' => $validated['nama_barang'],
+                        'tanggal' => now()->format('Y-m-d'),
+                    ],
+                    [
+                        'jumlah' => $validated['jumlah'],
+                        'satuan' => $validated['satuan'],
+                    ]
+                );
+            }
 
             $historyData = [
                 'nama_barang' => $validated['nama_barang'],
@@ -245,7 +341,7 @@ class StockController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi gagal',
-                'errors'  => $validator->errors(),
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -257,139 +353,139 @@ class StockController extends Controller
 
         $formatted = $results->map(function ($item) {
             return [
-                'id'            => $item->id,
-                'nama_barang'   => $item->nama_barang,
-                'Jumlah'        => $item->jumlah,
-                'satuan'        => $item->satuan,
-                'Harga Satuan'  => $item->harga,
-                'jumlah'        => $item->jumlah * $item->harga,
-                'bulan'         => optional($item->tanggal)->translatedFormat('F'),
-                'tahun'         => optional($item->tanggal)->format('Y'),
+                'id' => $item->id,
+                'nama_barang' => $item->nama_barang,
+                'Jumlah' => $item->jumlah,
+                'satuan' => $item->satuan,
+                'Harga Satuan' => $item->harga,
+                'jumlah' => $item->jumlah * $item->harga,
+                'bulan' => optional($item->tanggal)->translatedFormat('F'),
+                'tahun' => optional($item->tanggal)->format('Y'),
             ];
         });
 
         return response()->json([
             'success' => true,
             'message' => $formatted->isEmpty() ? 'Data tidak ditemukan' : 'Hasil pencarian',
-            'data'    => $formatted->values()
+            'data' => $formatted->values()
         ], 200);
     }
 
-    public function habis()
-    {
-        DB::beginTransaction();
-        try {
-            $currentMonth = now()->format('m');
-            $currentYear  = now()->format('Y');
+    // public function habis()
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         $currentMonth = now()->format('m');
+    //         $currentYear  = now()->format('Y');
 
-            // Cek apakah sudah ada data pada bulan & tahun yang sama
-            $alreadyExists = BarangHabis::whereMonth('tanggal', $currentMonth)
-                ->whereYear('tanggal', $currentYear)
-                ->exists();
+    //         // Cek apakah sudah ada data pada bulan & tahun yang sama
+    //         $alreadyExists = BarangHabis::whereMonth('tanggal', $currentMonth)
+    //             ->whereYear('tanggal', $currentYear)
+    //             ->exists();
 
-            if ($alreadyExists) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Fungsi habis() sudah pernah dijalankan pada bulan ini',
-                    'data'    => []
-                ], 400);
-            }
+    //         if ($alreadyExists) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Fungsi habis() sudah pernah dijalankan pada bulan ini',
+    //                 'data'    => []
+    //             ], 400);
+    //         }
 
-            // Ambil semua data stock_opname dengan jumlah == 0
-            $stockOpname = StockOpname::where('jumlah', '=', 0)->get();
+    //         // Ambil semua data stock_opname dengan jumlah == 0
+    //         $stockOpname = StockOpname::where('jumlah', '=', 0)->get();
 
-            if ($stockOpname->isEmpty()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Tidak ada data dengan jumlah 0',
-                    'data'    => []
-                ], 404);
-            }
+    //         if ($stockOpname->isEmpty()) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Tidak ada data dengan jumlah 0',
+    //                 'data'    => []
+    //             ], 404);
+    //         }
 
-            foreach ($stockOpname as $item) {
-                BarangHabis::create([
-                    'nama_barang' => $item->nama_barang,
-                    // 'tanggal'     => $item->tanggal,
-                    'tanggal'     => now()->format('Y-m-d'),
-                ]);
-            }
+    //         foreach ($stockOpname as $item) {
+    //             BarangHabis::create([
+    //                 'nama_barang' => $item->nama_barang,
+    //                 // 'tanggal'     => $item->tanggal,
+    //                 'tanggal'     => now()->format('Y-m-d'),
+    //             ]);
+    //         }
 
-            DB::commit();
-            return response()->json([
-                'success' => true,
-                'message' => 'Data stock opname berhasil dipindahkan ke BarangHabis',
-                'data'    => $stockOpname
-            ], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat memproses data',
-                'error'   => $e->getMessage()
-            ], 500);
-        }
-    }
+    //         DB::commit();
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Data stock opname berhasil dipindahkan ke BarangHabis',
+    //             'data'    => $stockOpname
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Terjadi kesalahan saat memproses data',
+    //             'error'   => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 
 
-    public function masih()
-    {
-        DB::beginTransaction();
-        try {
-            // Cek apakah pada bulan ini sudah pernah dijalankan
-            $currentMonth = now()->format('m');
-            $currentYear = now()->format('Y');
+    // public function masih()
+    // {
+    //     DB::beginTransaction();
+    //     try {
+    //         // Cek apakah pada bulan ini sudah pernah dijalankan
+    //         $currentMonth = now()->format('m');
+    //         $currentYear = now()->format('Y');
 
-            $alreadyExists = BarangMasih::whereMonth('tanggal', $currentMonth)
-                ->whereYear('tanggal', $currentYear)
-                ->exists();
+    //         $alreadyExists = BarangMasih::whereMonth('tanggal', $currentMonth)
+    //             ->whereYear('tanggal', $currentYear)
+    //             ->exists();
 
-            if ($alreadyExists) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Fungsi masih() sudah pernah dijalankan pada bulan ini',
-                    'data' => []
-                ], 400);
-            }
+    //         if ($alreadyExists) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Fungsi masih() sudah pernah dijalankan pada bulan ini',
+    //                 'data' => []
+    //             ], 400);
+    //         }
 
-            // Ambil semua data stock_opname dengan jumlah > 0
-            $stockOpname = StockOpname::where('jumlah', '>', 0)->get();
+    //         // Ambil semua data stock_opname dengan jumlah > 0
+    //         $stockOpname = StockOpname::where('jumlah', '>', 0)->get();
 
-            if ($stockOpname->isEmpty()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Tidak ada data dengan jumlah > 0',
-                    'data' => []
-                ], 404);
-            }
+    //         if ($stockOpname->isEmpty()) {
+    //             return response()->json([
+    //                 'success' => false,
+    //                 'message' => 'Tidak ada data dengan jumlah > 0',
+    //                 'data' => []
+    //             ], 404);
+    //         }
 
-            foreach ($stockOpname as $item) {
-                // Simpan ke tabel barang_masih
-                BarangMasih::create([
-                    'nama_barang' => $item->nama_barang,
-                    'jumlah'      => $item->jumlah,
-                    'satuan'      => $item->satuan,
-                    'tanggal'     => $item->tanggal,
-                ]);
+    //         foreach ($stockOpname as $item) {
+    //             // Simpan ke tabel barang_masih
+    //             BarangMasih::create([
+    //                 'nama_barang' => $item->nama_barang,
+    //                 'jumlah'      => $item->jumlah,
+    //                 'satuan'      => $item->satuan,
+    //                 'tanggal'     => $item->tanggal,
+    //             ]);
 
-                // Update tanggal di stock_opname
-                $item->update([
-                    'tanggal' => now()->format('Y-m-d'),
-                ]);
-            }
+    //             // Update tanggal di stock_opname
+    //             $item->update([
+    //                 'tanggal' => now()->format('Y-m-d'),
+    //             ]);
+    //         }
 
-            DB::commit();
-            return response()->json([
-                'success' => true,
-                'message' => 'Data berhasil dipindahkan ke BarangMasih dan tanggal StockOpname diperbarui',
-                'data' => $stockOpname
-            ], 200);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan saat memproses data',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
+    //         DB::commit();
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Data berhasil dipindahkan ke BarangMasih dan tanggal StockOpname diperbarui',
+    //             'data' => $stockOpname
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Terjadi kesalahan saat memproses data',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
 }

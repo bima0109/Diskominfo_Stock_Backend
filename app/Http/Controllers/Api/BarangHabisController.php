@@ -76,63 +76,63 @@ class BarangHabisController extends Controller
     }
 
 
-    public function updateTanggalHabis(Request $request, $id)
-    {
-        try {
-            $request->validate([
-                'tanggal' => 'required|date_format:Y-m-d'
-            ]);
+    // public function updateTanggalHabis(Request $request, $id)
+    // {
+    //     try {
+    //         $request->validate([
+    //             'tanggal' => 'required|date_format:Y-m-d'
+    //         ]);
 
-            $barang = BarangHabis::findOrFail($id);
-            $barang->tanggal = Carbon::parse($request->tanggal);
-            $barang->save();
+    //         $barang = BarangHabis::findOrFail($id);
+    //         $barang->tanggal = Carbon::parse($request->tanggal);
+    //         $barang->save();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Tanggal barang habis berhasil diperbarui',
-                'data' => [
-                    'id' => $barang->id,
-                    'nama_barang' => $barang->nama_barang,
-                    'tanggal' => $barang->tanggal->format('d-m-Y')
-                ]
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memperbarui tanggal barang habis',
-                'error' => config('app.debug') ? $e->getMessage() : 'Silakan coba lagi nanti'
-            ], 500);
-        }
-    }
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Tanggal barang habis berhasil diperbarui',
+    //             'data' => [
+    //                 'id' => $barang->id,
+    //                 'nama_barang' => $barang->nama_barang,
+    //                 'tanggal' => $barang->tanggal->format('d-m-Y')
+    //             ]
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Gagal memperbarui tanggal barang habis',
+    //             'error' => config('app.debug') ? $e->getMessage() : 'Silakan coba lagi nanti'
+    //         ], 500);
+    //     }
+    // }
 
-    public function updateTanggalMasih(Request $request, $id)
-    {
-        try {
-            $request->validate([
-                'tanggal' => 'required|date_format:Y-m-d'
-            ]);
+    // public function updateTanggalMasih(Request $request, $id)
+    // {
+    //     try {
+    //         $request->validate([
+    //             'tanggal' => 'required|date_format:Y-m-d'
+    //         ]);
 
-            $barang = BarangMasih::findOrFail($id);
-            $barang->tanggal = Carbon::parse($request->tanggal);
-            $barang->save();
+    //         $barang = BarangMasih::findOrFail($id);
+    //         $barang->tanggal = Carbon::parse($request->tanggal);
+    //         $barang->save();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Tanggal barang masih berhasil diperbarui',
-                'data' => [
-                    'id' => $barang->id,
-                    'nama_barang' => $barang->nama_barang,
-                    'tanggal' => $barang->tanggal->format('d-m-Y')
-                ]
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memperbarui tanggal barang masih',
-                'error' => config('app.debug') ? $e->getMessage() : 'Silakan coba lagi nanti'
-            ], 500);
-        }
-    }
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Tanggal barang masih berhasil diperbarui',
+    //             'data' => [
+    //                 'id' => $barang->id,
+    //                 'nama_barang' => $barang->nama_barang,
+    //                 'tanggal' => $barang->tanggal->format('d-m-Y')
+    //             ]
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Gagal memperbarui tanggal barang masih',
+    //             'error' => config('app.debug') ? $e->getMessage() : 'Silakan coba lagi nanti'
+    //         ], 500);
+    //     }
+    // }
 
     /**
      * Store a newly created resource in storage.
