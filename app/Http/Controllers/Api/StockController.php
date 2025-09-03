@@ -49,7 +49,7 @@ class StockController extends Controller
                         'nama_barang' => $item->nama_barang,
                         'jumlah' => $item->jumlah,
                         'satuan' => $item->satuan,
-                        'tanggal' => $now->format('Y-m-d'),
+                        'tanggal' => $item->tanggal,
                     ]);
                 }
 
@@ -57,7 +57,7 @@ class StockController extends Controller
                 if ($item->jumlah == 0 && !$alreadyInHabis) {
                     BarangHabis::create([
                         'nama_barang' => $item->nama_barang,
-                        'tanggal' => $now->format('Y-m-d'),
+                        'tanggal' => $item->tanggal,
                     ]);
                 }
 

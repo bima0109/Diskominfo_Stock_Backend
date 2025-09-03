@@ -71,14 +71,14 @@ class UserSeeder extends Seeder
                 'nama' => 'Layla Salsabila',
                 'username' => 'kabid.ikp',
                 'id_role' => 4,
-                'id_bidang' => 3,
+                'id_bidang' => 1,
                 'role' => 'KABID',
             ],
             [
                 'nama' => 'Zainal Abidin',
                 'username' => 'kabid.tik',
                 'id_role' => 4,
-                'id_bidang' => 1,
+                'id_bidang' => 4,
                 'role' => 'KABID',
             ],
         ];
