@@ -27,6 +27,7 @@ class VerifikasiController extends Controller
                 $verifikasi->permintaans->map(function ($permintaan) {
                     $stock = DB::table('stock_opnames')->where('id', $permintaan->kode_barang)->first();
                     $permintaan->jumlah_stock = $stock ? $stock->jumlah : 0;
+                    $permintaan->harga = $stock ? $stock->harga :0;
                     return $permintaan;
                 });
                 return $verifikasi;
