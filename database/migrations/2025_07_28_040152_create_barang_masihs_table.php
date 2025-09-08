@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('jumlah');
             $table->string('satuan');
             $table->date('tanggal');
+            $table->decimal('harga', 10, 2);
             $table->timestamps();
         });
     }

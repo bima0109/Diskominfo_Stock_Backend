@@ -14,6 +14,7 @@ class BarangMasih extends Model
         'jumlah',
         'satuan',
         'tanggal',
+        'harga',
         
     ];
 }

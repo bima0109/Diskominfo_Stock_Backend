@@ -20,11 +20,8 @@ use App\Http\Controllers\Api\CartController;
 // Endpoint login tanpa autentikasi
 Route::post('/login', [AuthController::class, 'login']);
 
-/*
-|--------------------------------------------------------------------------
-| Protected API Routes (Auth Required)
-|--------------------------------------------------------------------------
-*/
+// api update tanggal (cron job)
+Route::put('/updateTanggal', [StockController::class, 'updateAllTanggalToNow']);
 
 Route::middleware('auth:api')->group(function () {
 
@@ -54,6 +51,8 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/stock/{id}', [StockController::class, 'update']);
     Route::delete('/stock/{id}', [StockController::class, 'destroy']);
     Route::post('/stock/search', [StockController::class, 'search']);
+    
+
 
 
     // Route untuk Verifikasi

@@ -22,6 +22,7 @@ class BarangHabisController extends Controller
                 return [
                     'id' => $item->id,
                     'nama_barang' => $item->nama_barang,
+                    'harga'=> $item->harga,
                     'tanggal' => Carbon::parse($item->tanggal)->format('d-m-Y'),
                     'created_at' => $item->created_at ? $item->created_at->toDateTimeString() : null,
                     'updated_at' => $item->updated_at ? $item->updated_at->toDateTimeString() : null,
@@ -54,6 +55,7 @@ class BarangHabisController extends Controller
                     'nama_barang' => $item->nama_barang,
                     'jumlah' => $item->jumlah,
                     'satuan' => $item->satuan,
+                    'harga'=> $item->harga,
                     'tanggal' => Carbon::parse($item->tanggal)->format('d-m-Y'),
                     'created_at' => $item->created_at ? $item->created_at->toDateTimeString() : null,
                     'updated_at' => $item->updated_at ? $item->updated_at->toDateTimeString() : null,

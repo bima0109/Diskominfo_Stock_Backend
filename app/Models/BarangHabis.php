@@ -12,6 +12,7 @@ class BarangHabis extends Model
     protected $fillable = [
         'nama_barang',
         'tanggal',
+        'harga',
     ];
 
 }

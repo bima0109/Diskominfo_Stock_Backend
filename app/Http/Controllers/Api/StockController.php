@@ -28,7 +28,6 @@ class StockController extends Controller
 
             DB::beginTransaction();
 
-            // Ambil semua stok dari tabel utama
             $stockItems = StockOpname::all();
 
             foreach ($stockItems as $item) {
@@ -40,39 +39,63 @@ class StockController extends Controller
                     ->whereDate('tanggal', $item->tanggal)
                     ->exists();
 
-
-                // Jika jumlah > 0, dan data belum ada di BarangMasih bulan ini, insert
+                // BarangMasih
                 if ($item->jumlah > 0 && !$alreadyInMasih) {
                     BarangMasih::create([
                         'nama_barang' => $item->nama_barang,
                         'jumlah' => $item->jumlah,
                         'satuan' => $item->satuan,
+                        'harga' => $item->harga,
                         'tanggal' => $item->tanggal,
                     ]);
                 }
 
-                // Jika jumlah == 0, dan data belum ada di BarangHabis bulan ini, insert
+                // BarangHabis
                 if ($item->jumlah == 0 && !$alreadyInHabis) {
                     BarangHabis::create([
                         'nama_barang' => $item->nama_barang,
+                        'harga' => $item->harga,
                         'tanggal' => $item->tanggal,
                     ]);
                 }
 
-                // Realtime update: hapus dari tabel yang tidak sesuai dengan jumlah sekarang
+                // Realtime perbaikan
                 if ($item->jumlah == 0) {
-                    // jika jumlah 0, hapus dari barangmasih bulan ini
                     BarangMasih::where('nama_barang', $item->nama_barang)
                         ->whereMonth('tanggal', $currentMonth)
                         ->whereYear('tanggal', $currentYear)
                         ->delete();
                 } else {
-                    // jika jumlah > 0, hapus dari baranghabis bulan ini
                     BarangHabis::where('nama_barang', $item->nama_barang)
                         ->whereMonth('tanggal', $currentMonth)
                         ->whereYear('tanggal', $currentYear)
                         ->delete();
                 }
+
+                $existingHistory = HistoryStock::where('nama_barang', $item->nama_barang)
+                    ->whereMonth('tanggal', Carbon::parse($item->tanggal)->month)
+                    ->whereYear('tanggal', Carbon::parse($item->tanggal)->year)
+                    ->first();
+
+                if ($existingHistory) {
+                    // update kalau bulan & tahun sama meskipun tanggal beda
+                    $existingHistory->update([
+                        'jumlah' => $item->jumlah,
+                        'satuan' => $item->satuan,
+                        'harga' => $item->harga,
+                        'tanggal' => $item->tanggal, 
+                    ]);
+                } else {
+                    // create kalau belum ada untuk nama_barang + bulan/tahun
+                    HistoryStock::create([
+                        'nama_barang' => $item->nama_barang,
+                        'jumlah' => $item->jumlah,
+                        'satuan' => $item->satuan,
+                        'harga' => $item->harga,
+                        'tanggal' => $item->tanggal,
+                    ]);
+                }
+
             }
 
             DB::commit();
@@ -94,7 +117,7 @@ class StockController extends Controller
 
                 return response()->json([
                     'success' => true,
-                    'message' => 'List semua data stock opname (jumlah > 0)',
+                    'message' => 'List semua data stock opname realtime',
                     'data' => $formatted
                 ], 200);
             }
@@ -116,6 +139,7 @@ class StockController extends Controller
     }
 
 
+
     public function store(Request $request)
     {
         try {
@@ -133,7 +157,7 @@ class StockController extends Controller
 
             //masukkan data ke dalam history stock
             $historyData = [
-                'id_stock' => $stockOpname->id,
+                // 'id_stock' => $stockOpname->id,
                 'nama_barang' => $stockOpname->nama_barang,
                 'jumlah' => $stockOpname->jumlah,
                 'satuan' => $stockOpname->satuan,
@@ -208,8 +232,6 @@ class StockController extends Controller
                 ], 404);
             }
 
-            $tanggalLama = $stockOpname->tanggal; // Simpan tanggal lama sebelum update
-
             $validated = $request->validate([
                 'nama_barang' => 'required|string|max:255|unique:stock_opnames,nama_barang,' . $id,
                 'jumlah' => 'required|integer',
@@ -256,6 +278,7 @@ class StockController extends Controller
                     [
                         'nama_barang' => $validated['nama_barang'],
                         'tanggal' => now()->format('Y-m-d'),
+
                     ],
                     [
                         'jumlah' => $validated['jumlah'],
@@ -264,15 +287,29 @@ class StockController extends Controller
                 );
             }
 
-            $historyData = [
-                'nama_barang' => $validated['nama_barang'],
-                'jumlah' => $validated['jumlah'],
-                'satuan' => $validated['satuan'],
-                'tanggal' => $tanggalLama, // tetap gunakan tanggal lama untuk history
-            ];
+            $existingHistory = HistoryStock::where('nama_barang', $validated['nama_barang'])
+                ->whereMonth('tanggal', now()->month)
+                ->whereYear('tanggal', now()->year)
+                ->first();
 
-            HistoryStock::where('id_stock', $stockOpname->id)
-                ->update($historyData);
+            if ($existingHistory) {
+                // Update kalau masih bulan & tahun yang sama
+                $existingHistory->update([
+                    'jumlah' => $validated['jumlah'],
+                    'satuan' => $validated['satuan'],
+                    'harga' => $validated['harga'],
+                    'tanggal' => now()->format('Y-m-d'),
+                ]);
+            } else {
+                // Buat baru kalau sudah beda bulan
+                HistoryStock::create([
+                    'nama_barang' => $validated['nama_barang'],
+                    'jumlah' => $validated['jumlah'],
+                    'satuan' => $validated['satuan'],
+                    'harga' => $validated['harga'],
+                    'tanggal' => now()->format('Y-m-d'),
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
@@ -368,6 +405,42 @@ class StockController extends Controller
             'data' => $formatted->values()
         ], 200);
     }
+
+    public function updateAllTanggalToNow()
+    {
+        try {
+            DB::beginTransaction();
+
+            $now = Carbon::now()->format('Y-m-d');
+
+            // Ambil semua data stock opname
+            $allStock = StockOpname::all();
+
+            foreach ($allStock as $stock) {
+
+                $stock->update([
+                    'tanggal' => $now
+                ]);
+
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Semua tanggal stock opname berhasil diupdate menjadi sekarang',
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengupdate tanggal semua data',
+                'error' => config('app.debug') ? $e->getMessage() : 'Terjadi kesalahan',
+            ], 500);
+        }
+    }
+
 
     // public function habis()
     // {
