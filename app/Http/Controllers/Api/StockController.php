@@ -32,16 +32,14 @@ class StockController extends Controller
             $stockItems = StockOpname::all();
 
             foreach ($stockItems as $item) {
-                // Cek apakah data ini sudah ada di BarangMasih / BarangHabis untuk bulan ini
                 $alreadyInMasih = BarangMasih::where('nama_barang', $item->nama_barang)
-                    ->whereMonth('tanggal', $currentMonth)
-                    ->whereYear('tanggal', $currentYear)
+                    ->whereDate('tanggal', $item->tanggal)
                     ->exists();
 
                 $alreadyInHabis = BarangHabis::where('nama_barang', $item->nama_barang)
-                    ->whereMonth('tanggal', $currentMonth)
-                    ->whereYear('tanggal', $currentYear)
+                    ->whereDate('tanggal', $item->tanggal)
                     ->exists();
+
 
                 // Jika jumlah > 0, dan data belum ada di BarangMasih bulan ini, insert
                 if ($item->jumlah > 0 && !$alreadyInMasih) {
