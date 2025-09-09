@@ -81,6 +81,13 @@ class UserSeeder extends Seeder
                 'id_bidang' => 4,
                 'role' => 'KABID',
             ],
+            [
+                'nama'=> 'Lulut',
+                'username'=> 'maestroman',
+                'id_role' => 6,
+                'id_bidang' => 3,
+                'role'=> 'MASTERADMIN',
+            ]
         ];
 
         foreach ($users as $user) {

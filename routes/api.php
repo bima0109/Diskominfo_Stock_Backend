@@ -35,6 +35,7 @@ Route::middleware('auth:api')->group(function () {
 
     // Route untuk User
     Route::get('/users', [UserController::class, 'index']);
+    Route::get('/users-master', [UserController::class, 'indexMaster']);
     Route::post('/users', [UserController::class, 'store']);
     Route::post('/users-show', [UserController::class, 'show']);
     Route::put('/users/{id}', [UserController::class, 'update']);

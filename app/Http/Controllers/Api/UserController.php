@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -33,6 +34,29 @@ class UserController extends Controller
         }
     }
 
+    public function indexMaster()
+    {
+        try {
+            $users = User::with(['role', 'bidang'])
+                ->whereHas('role', function ($query) {
+                    $query->where('nama', '!=', 'MASTERADMIN');
+                })
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $users,
+            ]);
+        } catch (Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil data pengguna',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
     /**
      * Store a newly created resource in storage.
      */
@@ -56,7 +80,7 @@ class UserController extends Controller
 
         try {
 
-            $role = \App\Models\Role::find($request->id_role);
+            $role = Role::find($request->id_role);
             if (!$role) {
                 return response()->json([
                     'success' => false,
@@ -164,7 +188,7 @@ class UserController extends Controller
             }
 
             if ($request->has('id_role')) {
-                $role = \App\Models\Role::find($request->id_role);
+                $role = Role::find($request->id_role);
                 if (!$role) {
                     return response()->json([
                         'success' => false,
