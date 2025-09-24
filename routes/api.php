@@ -52,8 +52,6 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/stock/{id}', [StockController::class, 'update']);
     Route::delete('/stock/{id}', [StockController::class, 'destroy']);
     Route::post('/stock/search', [StockController::class, 'search']);
-    
-
 
 
     // Route untuk Verifikasi
@@ -61,6 +59,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/verifikasi', [VerifikasiController::class, 'store']);
     Route::get('/veribid', [VerifikasiController::class, 'getByBidang']);
     Route::post('/rekap-tahunan', [VerifikasiController::class, 'getRekapTahunan']);
+    Route::post('/rekap-super', [VerifikasiController::class, 'getRekapTahunanPerBidang']);
     Route::put('/verif-kabid/{id}', [VerifikasiController::class, 'setVerifKabid']);
     Route::get('/verif-kabid', [VerifikasiController::class, 'diproses']);
     Route::put('/verif-sekre/{id}', [VerifikasiController::class, 'setVerifSekre']);

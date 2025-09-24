@@ -263,7 +263,11 @@ class StockController extends Controller
                         'nama_barang' => $validated['nama_barang'],
                         'tanggal' => now()->format('Y-m-d'),
                     ],
-                    [] // tidak ada field tambahan
+                    [
+                        'jumlah' => $validated['jumlah'],
+                        'satuan' => $validated['satuan'],
+                        'harga' => $validated['harga'],
+                    ]
                 );
             } else {
                 // Pindah ke BarangMasih
@@ -283,6 +287,7 @@ class StockController extends Controller
                     [
                         'jumlah' => $validated['jumlah'],
                         'satuan' => $validated['satuan'],
+                        'harga' => $validated['harga'],
                     ]
                 );
             }

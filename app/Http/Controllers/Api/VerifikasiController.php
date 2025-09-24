@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\Models\Cart;
 use App\Models\Permintaan;
+use App\Models\Bidang;
 
 class VerifikasiController extends Controller
 {
@@ -27,7 +28,7 @@ class VerifikasiController extends Controller
                 $verifikasi->permintaans->map(function ($permintaan) {
                     $stock = DB::table('stock_opnames')->where('id', $permintaan->kode_barang)->first();
                     $permintaan->jumlah_stock = $stock ? $stock->jumlah : 0;
-                    $permintaan->harga = $stock ? $stock->harga :0;
+                    $permintaan->harga = $stock ? $stock->harga : 0;
                     return $permintaan;
                 });
                 return $verifikasi;
@@ -468,6 +469,60 @@ class VerifikasiController extends Controller
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat mengambil data',
                 'error' => config('app.debug') ? $e->getMessage() : 'Silakan coba lagi nanti'
+            ], 500);
+        }
+    }
+
+    public function getRekapTahunanPerBidang(Request $request)
+    {
+        try {
+            $tahun = $request->get('tahun', date('Y'));
+
+            $bidangs = Bidang::all();
+            $rekapPerBidang = [];
+
+            foreach ($bidangs as $bidang) {
+                $verifikasis = Verifikasi::with('permintaans')
+                    ->where('id_bidang', $bidang->id)
+                    ->whereYear('tanggal', $tahun)
+                    ->where('status', 'ACC PPTK SEKRETARIAT')
+                    ->get();
+
+                $rekapBarang = [];
+
+                foreach ($verifikasis as $verifikasi) {
+                    foreach ($verifikasi->permintaans as $permintaan) {
+                        $key = $permintaan->nama_barang . '-' . $permintaan->satuan;
+
+                        if (!isset($rekapBarang[$key])) {
+                            $rekapBarang[$key] = [
+                                'nama_barang' => $permintaan->nama_barang,
+                                'satuan' => $permintaan->satuan,
+                                'jumlah' => 0
+                            ];
+                        }
+
+                        $rekapBarang[$key]['jumlah'] += $permintaan->jumlah;
+                    }
+                }
+
+                $rekapPerBidang[] = [
+                    'bidang' => $bidang->nama,
+                    'tahun' => $tahun,
+                    'permintaan' => empty($rekapBarang) ? '-' : array_values($rekapBarang)
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'tahun' => $tahun,
+                'data' => $rekapPerBidang
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengambil rekap tahunan per bidang',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
