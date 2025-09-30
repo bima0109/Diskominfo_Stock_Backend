@@ -398,8 +398,7 @@ class UserController extends Controller
             $validator = Validator::make($request->all(), [
                 'nama' => 'sometimes|required|string|max:255',
                 'username' => 'sometimes|required|string|unique:users,username,' . $user->id,
-                // 'id_role' => 'sometimes|required|exists:roles,id',
-                // 'id_bidang' => 'sometimes|required|exists:bidangs,id',
+                'ttd' => 'sometimes|image|mimes:jpeg,png,jpg|max:2048'
             ]);
 
             if ($validator->fails()) {
@@ -410,13 +409,26 @@ class UserController extends Controller
                 ], 422);
             }
 
-            // Update field yang diizinkan
             $user->fill($request->only(['nama', 'username']));
+
+            if ($request->hasFile('ttd')) {
+                if ($user->ttd && \Storage::disk('public')->exists($user->ttd)) {
+                    \Storage::disk('public')->delete($user->ttd);
+                }
+
+                $pathTtd = $request->file('ttd')->store('ttd', 'public');
+                $user->ttd = $pathTtd;
+            }
+
+            // ambil perubahan sebelum disimpan
+            $changes = $user->getDirty();
+
             $user->save();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Profil berhasil diperbarui',
+                'perubahan' => $changes,
                 'data' => $user
             ]);
         } catch (Exception $e) {
@@ -427,4 +439,5 @@ class UserController extends Controller
             ], 500);
         }
     }
+
 }

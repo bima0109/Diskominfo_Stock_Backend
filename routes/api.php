@@ -43,7 +43,7 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/users-reset/{id}', [UserController::class, 'resetPassword']);
     Route::get('/profile', [UserController::class, 'getProfile']);
     Route::put('/reset', [UserController::class, 'updatePassword']);
-    Route::put('/profile', [UserController::class, 'updateProfile']);
+    Route::post('/profile', [UserController::class, 'updateProfile']);
 
     //Route untuk Stock Opname
     Route::get('/stock', [StockController::class, 'index']);
