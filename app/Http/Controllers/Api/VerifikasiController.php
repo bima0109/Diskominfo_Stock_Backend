@@ -425,6 +425,7 @@ class VerifikasiController extends Controller
             $verifikasi->status = 'ACC PPTK SEKRETARIAT';
             $verifikasi->menyetujui = $user->nama;
             $verifikasi->tanggal_acc = now();
+            $verifikasi->ttd = $user->ttd;
             $verifikasi->save();
 
             return response()->json([

@@ -25,6 +25,7 @@ class User extends Authenticatable
         'role',
         'id_role',
         'id_bidang',
+        'ttd',
     ];
 
     public function role()

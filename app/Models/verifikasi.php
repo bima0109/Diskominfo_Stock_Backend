@@ -15,7 +15,8 @@ class verifikasi extends Model
         'id_user',
         'id_bidang',
         'menyetujui',
-        'tanggal_acc'
+        'tanggal_acc',
+        'ttd',
     ];
 
     public function user()

@@ -68,6 +68,7 @@ class UserController extends Controller
             'password' => 'required|string|min:6',
             'id_role' => 'required|exists:roles,id',
             'id_bidang' => 'required|exists:bidangs,id',
+            'ttd' => 'required_if:id_role,3|image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
         if ($validator->fails()) {
@@ -79,13 +80,17 @@ class UserController extends Controller
         }
 
         try {
-
             $role = Role::find($request->id_role);
             if (!$role) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Role tidak ditemukan',
                 ], 404);
+            }
+
+            $pathTtd = null;
+            if ($request->hasFile('ttd')) {
+                $pathTtd = $request->file('ttd')->store('ttd', 'public');
             }
 
             $user = User::create([
@@ -95,6 +100,7 @@ class UserController extends Controller
                 'role' => $role->nama,
                 'id_role' => $request->id_role,
                 'id_bidang' => $request->id_bidang,
+                'ttd' => $pathTtd,
             ]);
 
             return response()->json([
@@ -110,6 +116,7 @@ class UserController extends Controller
             ], 500);
         }
     }
+
 
     public function show(Request $request)
     {

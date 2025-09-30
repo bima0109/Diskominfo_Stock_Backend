@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('id_role')->constrained('roles');
             $table->string('role')->nullable();
             $table->foreignId('id_bidang')->constrained('bidangs');
-
+            $table->string('ttd')->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
